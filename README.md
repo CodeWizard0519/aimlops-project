@@ -307,7 +307,3 @@ async def predict(data: dict):
 - **CloudWatch Alarms:** Set up alarms in AWS CloudWatch to monitor SageMaker endpoints for metrics like CPU utilization, error rates, etc.
   
 - **Model Monitoring:** Utilize SageMaker Model Monitor to track model performance and data quality over time, ensuring your deployed model remains accurate and reliable.
-
----
-
-This guide provides a comprehensive approach to setting up your AWS infrastructure, creating the project structure for AIML Ops using FastAPI and SageMaker, and executing the pipeline from data ingestion to model deployment. Adjust paths, AWS credentials, and specifics to match your project requirements and security policies. This ensures your AIML Ops pipeline operates efficiently on AWS.
