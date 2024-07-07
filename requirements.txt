@@ -1,0 +1,7 @@
+boto3
+awswrangler
+pandas
+fastapi
+uvicorn
+sagemaker
+numpy>=1.23.5
