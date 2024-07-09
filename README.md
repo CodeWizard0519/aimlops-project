@@ -197,94 +197,33 @@ Follow these steps to set up IAM roles and policies for SageMaker:
 
 ### Step 7: Implement Python Scripts for AIML Ops Pipeline
 
-#### `src/data_ingestion.py`
+Run the data ingestion script:
 
-Handles uploading data to S3:
+    python src/data_ingestion.py
 
-```python
-import boto3
+Run the data preprocessing script:
 
-def upload_to_s3(local_file, bucket, s3_file):
-    s3_client = boto3.client('s3')
-    s3_client.upload_file(local_file, bucket, s3_file)
-    print(f"Uploaded {local_file} to s3://{bucket}/{s3_file}")
 
-if __name__ == "__main__":
-    upload_to_s3('data/raw/sample_data.csv', 'my-aiml-bucket', 'raw_data/sample_data.csv')
-```
+    python src/data_preprocessing.py
 
-#### `src/data_preprocessing.py`
 
-Performs data preprocessing using AWS Wrangler:
+#### Building Custom Training Image with SageMaker
 
-```python
-import awswrangler as wr
-
-def preprocess_data(input_path, output_path):
-    df = wr.s3.read_csv(input_path)
-    df_cleaned = df.dropna()  # Example preprocessing step (customize as needed)
-    wr.s3.to_csv(df_cleaned, output_path)
-    print(f"Preprocessed data saved to {output_path}")
-
-if __name__ == "__main__":
-    preprocess_data('s3://my-aiml-bucket/raw_data/sample_data.csv', 's3://my-aiml-bucket/processed_data/cleaned_data.csv')
-```
+    docker build -t my-training-image .
+    docker tag my-training-image:latest 767397784105.dkr.ecr.us-east-1.amazonaws.com/mlops/aimlops-project:latest
+    docker push 767397784105.dkr.ecr.us-east-1.amazonaws.com/mlops/aimlops-project:latest
 
 #### `src/train.py`
 
-Script for training the machine learning model using SageMaker:
+#### Script for training the machine learning model using SageMaker:
 
-```python
-import sagemaker
-from sagemaker import get_execution_role
+Run the model training script:
 
-def train_model(training_data_uri, output_path):
-    sagemaker_session = sagemaker.Session()
-    role = get_execution_role()
-
-    estimator = sagemaker.estimator.Estimator(
-        image_uri='your-training-image',
-        role=role,
-        instance_count=1,
-        instance_type='ml.m5
-
-.large',
-        output_path=output_path,
-        sagemaker_session=sagemaker_session
-    )
-
-    estimator.set_hyperparameters(batch_size=100, epochs=10)  # Example hyperparameters (customize as needed)
-    estimator.fit({'train': training_data_uri})
-    print(f"Model training completed. Output saved to {output_path}")
-
-if __name__ == "__main__":
-    train_model('s3://my-aiml-bucket/processed_data/cleaned_data.csv', 's3://my-aiml-bucket/model_output/')
-```
+    python src/train.py
 
 #### `src/predict.py`
 
-Sets up a FastAPI app for model predictions:
-
-```python
-from fastapi import FastAPI
-import boto3
-import json
-
-app = FastAPI()
-
-@app.post("/predict")
-async def predict(data: dict):
-    sagemaker_runtime = boto3.client('runtime.sagemaker')
-
-    response = sagemaker_runtime.invoke_endpoint(
-        EndpointName='your-endpoint-name',
-        ContentType='application/json',
-        Body=json.dumps(data)
-    )
-
-    result = json.loads(response['Body'].read().decode())
-    return {"prediction": result}
-```
+    python src/predict.py
 
 ### Step 8: Deploying FastAPI Application for Prediction
 
